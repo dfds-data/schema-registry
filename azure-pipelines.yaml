@@ -47,6 +47,7 @@ stages:
       - name: kubernetes-namespace
         value: "dataplatform-ajamn"
       - group: "schema-registry-dev"
+      - group: "saml2aws-dev"
 
     jobs:
       - deployment: K8s
@@ -126,6 +127,7 @@ stages:
       - name: kubernetes-namespace
         value: "datadelivery-gexyo"
       - group: "schema-registry"
+      - group: "saml2aws"
 
     jobs:
       - deployment: K8s
