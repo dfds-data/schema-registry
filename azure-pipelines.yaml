@@ -18,7 +18,6 @@ pr: none
 variables:
   vmImage: "ubuntu-latest"
   k8s-service-connection: "Kubernetes-Hellman-Saml2aws"
-  kubernetes-namespace: "datadelivery-gexyo"
 
 stages:
   # Continuous Integration steps
@@ -37,19 +36,103 @@ stages:
             artifact: manifests
             displayName: "Publish Artifact: manifests"
 
-  # Continuous Deployment steps
-  - stage: CD
-    displayName: "Continuous Deployment"
+  # Continuous Dev Deployment steps
+  - stage: CDD
+    displayName: "Continuous Dev Deployment"
     dependsOn: CI
     # Run CD only if CI succeeds
     condition: succeeded('CI')
+
+    variables:
+      - name: kubernetes-namespace
+        value: "dataplatform-ajamn"
+      - group: "schema-registry-dev"
 
     jobs:
       - deployment: K8s
         displayName: Deploy to Kubernetes
         variables:
           AWS_PROFILE: "saml"
-        environment: "Hellman"
+        environment: "schema-registry-dev"
+        strategy:
+          runOnce:
+            deploy:
+              steps:
+                # Setup auth against k8s
+                - bash: |
+                    VERSION=1.14.6
+                    BUILD_DATE=2019-08-22
+                    DOWNLOAD_URL=https://amazon-eks.s3-us-west-2.amazonaws.com/${VERSION}/${BUILD_DATE}/bin/linux/amd64/aws-iam-authenticator
+                    LOCAL_FILE=./aws-iam-authenticator
+                    curl -Lo $LOCAL_FILE $DOWNLOAD_URL
+                    chmod +x $LOCAL_FILE
+                    sudo mv $LOCAL_FILE /usr/local/bin
+
+                    # Install saml2aws
+                    VERSION=2.20.0
+                    DOWNLOAD_URL=https://github.com/Versent/saml2aws/releases/download/v${VERSION}/saml2aws_${VERSION}_linux_amd64.tar.gz
+                    LOCAL_FILE=./saml2aws.tar.gz
+                    curl -Lo $LOCAL_FILE $DOWNLOAD_URL
+                    tar xvzf $LOCAL_FILE
+                    rm $LOCAL_FILE
+                    sudo mv saml2aws /usr/local/bin
+
+                    # Configure saml2aws
+                    saml2aws configure --url=https://adfs.dfds.com/adfs/ls/IdpInitiatedSignOn.aspx --idp-provider=ADFS --mfa=Auto --session-duration=28800 --skip-prompt
+
+                    saml2aws login --url=https://adfs.dfds.com/adfs/ls/IdpInitiatedSignOn.aspx --idp-provider=ADFS --mfa=Auto --skip-prompt --force --disable-keychain
+                    eval $(saml2aws script --url=https://adfs.dfds.com/adfs/ls/IdpInitiatedSignOn.aspx --idp-provider=ADFS --mfa=Auto)
+                  env:
+                    SAML2AWS_PASSWORD: $(SAML2AWS_PASSWORD_DEV)
+                    SAML2AWS_USERNAME: $(SAML2AWS_USERNAME_DEV)
+                    SAML2AWS_ROLE: $(SAML2AWS_ROLE_DEV)
+                # Download manifest from current artifacts pipeline
+                - download: current
+                  artifact: manifests
+                  displayName: "Download Artifact: manifests"
+                # Replace token values in yaml files with pipeline variables
+                - task: replacetokens@3
+                  displayName: "Replace tokens in yaml files"
+                  inputs:
+                    rootDirectory: "$(Pipeline.Workspace)/manifests/"
+                    targetFiles: "**/*.yaml"
+                    encoding: "auto"
+                    writeBOM: true
+                    actionOnMissing: "fail"
+                    keepToken: true
+                    tokenPrefix: "$("
+                    tokenSuffix: ")"
+                    useLegacyPattern: false
+                    enableTransforms: false
+                    enableTelemetry: false
+                # Apply Kubernetes manifests
+                - task: Kubernetes@1
+                  displayName: "Apply manifests"
+                  inputs:
+                    connectionType: Kubernetes Service Connection
+                    kubernetesServiceEndpoint: "$(k8s-service-connection)"
+                    namespace: $(kubernetes-namespace)
+                    command: apply
+                    arguments: "-f $(Pipeline.Workspace)/manifests/"
+
+  # Continuous Prod Deployment steps
+  - stage: CD
+    displayName: "Continuous Deployment"
+    dependsOn: CDD
+    # Run CD only if CI succeeds
+    condition: succeeded('CDD')
+
+    variables:
+      - name: kubernetes-namespace
+        value: "datadelivery-gexyo"
+      - group: "schema-registry"
+
+    jobs:
+      - deployment: K8s
+        displayName: Deploy to Kubernetes
+        variables:
+          AWS_PROFILE: "saml"
+        environment: "schema-registry-prod"
         strategy:
           runOnce:
             deploy:
@@ -90,14 +173,14 @@ stages:
                 - task: replacetokens@3
                   displayName: "Replace tokens in yaml files"
                   inputs:
-                    rootDirectory: '$(Pipeline.Workspace)/manifests/'
-                    targetFiles: '**/*.yaml'
-                    encoding: 'auto'
+                    rootDirectory: "$(Pipeline.Workspace)/manifests/"
+                    targetFiles: "**/*.yaml"
+                    encoding: "auto"
                     writeBOM: true
-                    actionOnMissing: 'fail'
+                    actionOnMissing: "fail"
                     keepToken: true
-                    tokenPrefix: '$('
-                    tokenSuffix: ')'
+                    tokenPrefix: "$("
+                    tokenSuffix: ")"
                     useLegacyPattern: false
                     enableTransforms: false
                     enableTelemetry: false
