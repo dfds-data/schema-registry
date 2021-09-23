@@ -116,7 +116,7 @@ services:
       SCHEMA_REGISTRY_CONFLUENT_SCHEMA_REGISTRY_AUTHORIZER_CLASS: io.confluent.kafka.schemaregistry.security.authorizer.schemaregistryacl.SchemaRegistryAclAuthorizer
     env_file: .env
     volumes:
-      - ./schema-registry/jaas-config.conf:/etc/schema-registry/jaas_config.conf
+      - ./schema-registry/jaas_config.conf:/etc/schema-registry/jaas_config.conf
 
   sr-acl-cli:
     build:

@@ -70,3 +70,10 @@ spec:
               value: JETTY_AUTH
             - name: SCHEMA_REGISTRY_CONFLUENT_SCHEMA_REGISTRY_AUTHORIZER_CLASS
               value: io.confluent.kafka.schemaregistry.security.authorizer.schemaregistryacl.SchemaRegistryAclAuthorizer
+          volumeMounts:
+            - mountPath: /etc/schema-registry/jaas_config.conf
+              name: JAAS_CONFIG
+      volumes:
+        - name: JAAS_CONFIG
+          secret:
+            secretName: datadelivery-schema-registry
