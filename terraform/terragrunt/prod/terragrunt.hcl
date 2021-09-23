@@ -2,11 +2,11 @@
 remote_state {
   backend = "s3"
   config = {
-    bucket         = "dfds-datacatalogue-terraform"
+    bucket         = "dfds-schema-registry-terraform"
     key            = "terraform"
     region         = "eu-central-1"
     encrypt        = true
-    dynamodb_table = "datacatalogue-terraform-locks"
+    dynamodb_table = "schema-registry-terraform-locks"
   }
 }
 
