@@ -82,7 +82,7 @@ module "db" {
   username               = "superuser"
   create_random_password = true
   random_password_length = 32
-  port                   = 3306
+  port                   = 5432
   publicly_accessible    = true
 
   vpc_security_group_ids = [module.security_group.security_group_id]
