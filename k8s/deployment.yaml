@@ -72,8 +72,9 @@ spec:
               value: io.confluent.kafka.schemaregistry.security.authorizer.schemaregistryacl.SchemaRegistryAclAuthorizer
           volumeMounts:
             - mountPath: /etc/schema-registry/jaas_config.conf
-              name: JAAS_CONFIG
+              name: jaas-config
+              subPath: JAAS_CONFIG
       volumes:
-        - name: JAAS_CONFIG
+        - name: jaas-config
           secret:
             secretName: datadelivery-schema-registry

@@ -1,8 +1,8 @@
 create database schemaregistry;
 \c schemaregistry
-create table users ("myuser" text, "mypassword" text);
-create table userroles ("myuser" text, "myrole" text);
-insert into users("myuser", "mypassword") values ('barney', 'changeme');
-insert into userroles("myuser", "myrole") values ('barney', 'user');
-insert into users("myuser", "mypassword") values ('ted', 'letmein');
-insert into userroles("myuser", "myrole") values ('ted', 'user');
+create table users ("user" text, "password" text);
+create table userroles ("user" text, "role" text);
+insert into users("user", "password") values ('barney', 'changeme');
+insert into userroles("user", "role") values ('barney', 'user');
+insert into users("user", "password") values ('ted', 'letmein');
+insert into userroles("user", "role") values ('ted', 'user');
