@@ -55,3 +55,18 @@ spec:
                 secretKeyRef:
                   name: datadelivery-schema-registry
                   key: SCHEMA_REGISTRY_SCHEMA_REGISTRY_GROUP_ID
+            # Authentication & Authorization
+            - name: SCHEMA_REGISTRY_AUTHENTICATION_METHOD
+              value: BASIC
+            - name: SCHEMA_REGISTRY_AUTHENTICATION_ROLES
+              value: capability
+            - name: SCHEMA_REGISTRY_AUTHENTICATION_REALM
+              value: JDBCLoginModule
+            - name: SCHEMA_REGISTRY_OPTS
+              value: -Djava.security.auth.login.config=/etc/schema-registry/jaas_config.conf
+            - name: SCHEMA_REGISTRY_RESOURCE_EXTENSION_CLASS
+              value: io.confluent.kafka.schemaregistry.security.SchemaRegistrySecurityResourceExtension
+            - name: SCHEMA_REGISTRY_CONFLUENT_SCHEMA_REGISTRY_AUTH_MECHANISM
+              value: JETTY_AUTH
+            - name: SCHEMA_REGISTRY_CONFLUENT_SCHEMA_REGISTRY_AUTHORIZER_CLASS
+              value: io.confluent.kafka.schemaregistry.security.authorizer.schemaregistryacl.SchemaRegistryAclAuthorizer
