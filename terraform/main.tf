@@ -50,7 +50,7 @@ module "security_group" {
   # ingress
   ingress_with_cidr_blocks = [
     {
-      rule        = "mysql-tcp"
+      rule        = "postgresql-tcp"
       cidr_blocks = "0.0.0.0/0"
     },
   ]
