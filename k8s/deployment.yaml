@@ -17,7 +17,7 @@ spec:
       containers:
         - image: confluentinc/cp-schema-registry:6.2.0 # TODO: Paremetrize tag
           name: cp-schema-registry
-          imagePullPolicy: always
+          imagePullPolicy: Always
           ports:
             - containerPort: 8081
           resources:
