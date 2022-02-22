@@ -1,3 +1,11 @@
+# Disclaimer
+
+This repository was born from a wish of creating a schema registry deployment that uses ACL and Basic Auth for Authentication/Authorization.
+
+However, this feature at the time of writing this is not mature in the Schema Registry code and as such this code is currently not maintained.
+
+It is still used for reference purposes.
+
 # Schema Registry
 
 This repository contains some kubernetes manifests that can be used to deploy schema registry to kubernetes.
